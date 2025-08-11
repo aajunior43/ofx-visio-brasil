@@ -27,6 +27,8 @@ export function ExportPDFButton({ account, transactions }: ExportPDFButtonProps)
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
+    const headerHeight = 140; // espaço reservado para o cabeçalho em todas as páginas
+
     const logoUrl = "/lovable-uploads/a6fc81f6-f1ba-4ec7-a42b-84478275db32.png";
     let logoData: string | null = null;
     try { logoData = await toDataUrl(logoUrl); } catch {}
@@ -44,10 +46,11 @@ export function ExportPDFButton({ account, transactions }: ExportPDFButtonProps)
       doc.text("Relatório de Extrato OFX", pageWidth / 2, 118, { align: 'center' });
     };
 
+    // desenhar cabeçalho da primeira página
     drawHeader();
 
     // Account info
-    let y = 150;
+    let y = headerHeight + 10; // iniciar logo após o cabeçalho
     if (account) {
       doc.setFontSize(11);
       const lines = [
@@ -65,21 +68,48 @@ export function ExportPDFButton({ account, transactions }: ExportPDFButtonProps)
       formatDateBRL(t.dtPosted),
       formatCurrencyBRL(t.amount),
       t.fitId,
-      (t.name || t.memo || '').slice(0, 120),
+      t.name || t.memo || '',
     ]);
+
+    // Calcular largura disponível
+    const availableWidth = pageWidth - 80; // 40px margem de cada lado
 
     autoTable(doc, {
       startY: y + 10,
       head,
       body,
-      styles: { fontSize: 9, cellPadding: 6 },
-      headStyles: { fillColor: [0, 51, 102] },
-      didDrawPage: () => {
-        // Header per page
+      styles: { 
+        fontSize: 7,
+        cellPadding: 3,
+        overflow: 'linebreak',
+        cellWidth: 'wrap',
+        halign: 'left'
+      },
+      headStyles: { 
+        fillColor: [0, 51, 102],
+        fontSize: 8,
+        fontStyle: 'bold',
+        textColor: [255, 255, 255]
+      },
+      columnStyles: {
+        0: { cellWidth: 45 },   // Tipo - menor
+        1: { cellWidth: 65 },   // Data - menor
+        2: { cellWidth: 70 },   // Valor - menor
+        3: { cellWidth: 80 },   // FITID - menor
+        4: { cellWidth: availableWidth - 260 } // Descrição - usa o espaço restante
+      },
+      margin: { left: 40, right: 40, top: headerHeight, bottom: 60 },
+      tableWidth: availableWidth,
+      pageBreak: 'auto',
+      rowPageBreak: 'avoid',
+      didDrawPage: (data) => {
+        // redesenhar cabeçalho em todas as páginas
         drawHeader();
-        // Footer per page
+        // rodapé
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
+        doc.setFontSize(8);
+        const pageNum = data.pageNumber;
+        doc.text(`Página ${pageNum}`, pageWidth / 2, pageHeight - 40, { align: 'center' });
         doc.text("DEV ALEKSANDRO ALVES", pageWidth / 2, pageHeight - 20, { align: 'center' });
       },
     });

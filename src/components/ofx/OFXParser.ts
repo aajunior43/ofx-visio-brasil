@@ -108,7 +108,7 @@ export function formatCurrencyBRL(n: number): string {
 }
 
 export function formatDateBRL(raw: string): string {
-  // OFX often has YYYYMMDD or YYYYMMDDHHmmSS
+  // OFX formats: YYYYMMDD or YYYYMMDDHHmmSS[.sss][Z or offset]
   const m = raw.match(/^(\d{4})(\d{2})(\d{2})/);
   if (!m) return raw;
   const [_, y, mo, d] = m;

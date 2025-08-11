@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ErrorModal } from "@/components/common/ErrorModal";
 import { parseOFX, OFXData } from "./OFXParser";
 import { useI18n } from "@/context/i18n";
+import { cn } from "@/lib/utils";
 
 interface UploadAreaProps {
   onParsed: (data: OFXData) => void;
@@ -16,6 +17,7 @@ export function UploadArea({ onParsed }: UploadAreaProps) {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const { toast } = useToast();
   const { t } = useI18n();
 
@@ -67,8 +69,29 @@ export function UploadArea({ onParsed }: UploadAreaProps) {
     reader.readAsText(file);
   };
 
+  const onDropFiles = (files: FileList | null) => {
+    setDragOver(false);
+    const f = files?.[0];
+    if (f) onFile(f);
+  };
+
   return (
-    <div className="w-full py-16 flex flex-col items-center justify-center bg-card-grad rounded-xl shadow-soft animate-enter">
+    <div
+      className={cn(
+        "w-full py-16 flex flex-col items-center justify-center bg-card-grad rounded-xl shadow-soft animate-enter border-2 border-dashed transition-colors",
+        dragOver ? "border-primary bg-primary/5" : "border-transparent"
+      )}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDropFiles(e.dataTransfer.files);
+      }}
+      aria-label={t("upload_ofx")}
+    >
       <input
         ref={inputRef}
         type="file"
@@ -86,7 +109,7 @@ export function UploadArea({ onParsed }: UploadAreaProps) {
         className="pulse hover-scale"
         aria-label={t("upload_ofx")}
       >
-        <UploadCloud /> {t("upload_ofx")}
+        <UploadCloud /> {dragOver ? "Solte para carregar" : t("upload_ofx")}
       </Button>
       {loading && (
         <div className="w-full max-w-xl mt-8">
@@ -97,6 +120,7 @@ export function UploadArea({ onParsed }: UploadAreaProps) {
           <Progress value={progress} className="h-3 bg-secondary" />
         </div>
       )}
+      <p className="mt-4 text-sm text-muted-foreground">Arraste e solte seu arquivo OFX aqui</p>
       <ErrorModal
         open={!!error}
         title={t("upload_error")}

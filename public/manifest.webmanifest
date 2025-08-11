@@ -1,0 +1,39 @@
+{
+  "name": "Visualizador OFX - Extratos Bancários",
+  "short_name": "OFX Viewer",
+  "description": "Visualize arquivos OFX com gráficos, tabelas interativas e exportação. 100% privado.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["finance", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/lovable-uploads/a6fc81f6-f1ba-4ec7-a42b-84478275db32.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Carregar OFX",
+      "short_name": "Upload",
+      "description": "Carregar arquivo OFX",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/favicon.ico",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
