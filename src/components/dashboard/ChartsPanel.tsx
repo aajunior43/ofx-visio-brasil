@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Transaction } from "../ofx/OFXParser";
-import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip as RTooltip, LineChart, Line, XAxis, YAxis, BarChart, Bar } from "recharts";
+import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip as RTooltip, LineChart, Line, XAxis, YAxis, BarChart, Bar, CartesianGrid, Brush, Tooltip, ReferenceLine, Legend } from "recharts";
 
 function inferCategory(name?: string) {
   const t = (name || "").toLowerCase();
@@ -45,11 +45,12 @@ export function ChartsPanel({ transactions }: { transactions: Transaction[] }) {
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={typeData} dataKey="value" nameKey="name" outerRadius={80}>
+              <Pie data={typeData} dataKey="value" nameKey="name" outerRadius={80} isAnimationActive>
                 {typeData.map((e, i) => (
                   <Cell key={i} fill={e.color} />
                 ))}
               </Pie>
+              <Legend />
               <RTooltip />
             </PieChart>
           </ResponsiveContainer>
@@ -63,9 +64,20 @@ export function ChartsPanel({ transactions }: { transactions: Transaction[] }) {
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={balanceSeries}>
+              <defs>
+                <linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--info))" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="hsl(var(--info))" stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="i" hide />
               <YAxis hide />
-              <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+              <Tooltip />
+              <Legend />
+              <ReferenceLine y={0} stroke="#888" />
+              <Line type="monotone" dataKey="balance" stroke="url(#balanceGrad)" strokeWidth={2} dot={false} />
+              <Brush travellerWidth={8} height={16} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -78,9 +90,11 @@ export function ChartsPanel({ transactions }: { transactions: Transaction[] }) {
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categories}>
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis hide />
-              <Bar dataKey="value" fill="hsl(var(--info))" />
+              <Tooltip />
+              <Bar dataKey="value" fill="hsl(var(--primary))" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

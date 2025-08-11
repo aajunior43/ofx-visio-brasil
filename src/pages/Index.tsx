@@ -6,6 +6,7 @@ import { TransactionsTable } from "@/components/ofx/TransactionsTable";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { ChartsPanel } from "@/components/dashboard/ChartsPanel";
 import { ExportCSVButton } from "@/components/common/ExportCSVButton";
+import { ExportPDFButton } from "@/components/common/ExportPDFButton";
 import { OFXData, Transaction } from "@/components/ofx/OFXParser";
 import { useI18n } from "@/context/i18n";
 import { Lock } from "lucide-react";
@@ -16,7 +17,6 @@ const Index = () => {
   const { t } = useI18n();
 
   useEffect(() => {
-    // SEO: set title dynamically
     document.title = "Visualizador OFX | Extratos Bancários (pt‑BR)";
   }, []);
 
@@ -79,7 +79,10 @@ const Index = () => {
       </footer>
 
       {data?.transactions?.length ? (
-        <ExportCSVButton getCSV={getCSV} />
+        <>
+          <ExportCSVButton getCSV={getCSV} />
+          <ExportPDFButton account={data.account} transactions={visible} />
+        </>
       ) : null}
     </div>
   );
