@@ -11,11 +11,18 @@ interface HeaderProps {
 
 export function Header({ onLoadLastSession, onEnableNotifications }: HeaderProps) {
   const { t } = useI18n();
+  const logo = "/lovable-uploads/a6fc81f6-f1ba-4ec7-a42b-84478275db32.png";
   return (
     <header className="w-full sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-md bg-hero shadow-elevate" aria-hidden />
+          <img
+            src={logo}
+            alt="Brasão da Prefeitura de Inajá"
+            className="h-9 w-auto object-contain drop-shadow-sm hover-scale"
+            loading="eager"
+            decoding="async"
+          />
           <h1 className="text-lg font-semibold">{t("app_title")}</h1>
         </div>
         <div className="flex items-center gap-2">

@@ -10,23 +10,44 @@ interface ExportPDFButtonProps {
   transactions: Transaction[];
 }
 
+async function toDataUrl(url: string): Promise<string> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export function ExportPDFButton({ account, transactions }: ExportPDFButtonProps) {
-  const generate = () => {
+  const generate = async () => {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
-    // Header
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text("PREFEITURA DE INAJÁ", pageWidth / 2, 40, { align: 'center' });
+    const logoUrl = "/lovable-uploads/a6fc81f6-f1ba-4ec7-a42b-84478275db32.png";
+    let logoData: string | null = null;
+    try { logoData = await toDataUrl(logoUrl); } catch {}
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text("Relatório de Extrato OFX", pageWidth / 2, 60, { align: 'center' });
+    const drawHeader = () => {
+      const logoW = 64, logoH = 64;
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', pageWidth / 2 - logoW / 2, 20, logoW, logoH);
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text("PREFEITURA DE INAJÁ", pageWidth / 2, 100, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text("Relatório de Extrato OFX", pageWidth / 2, 118, { align: 'center' });
+    };
+
+    drawHeader();
 
     // Account info
-    let y = 90;
+    let y = 150;
     if (account) {
       doc.setFontSize(11);
       const lines = [
@@ -38,7 +59,6 @@ export function ExportPDFButton({ account, transactions }: ExportPDFButtonProps)
       lines.forEach((t) => { doc.text(t, 40, y); y += 16; });
     }
 
-    // Table
     const head = [["Tipo", "Data", "Valor", "FITID", "Descrição"]];
     const body = transactions.map((t) => [
       (t.trnType || '').toUpperCase().includes('CREDIT') ? 'Crédito' : 'Débito',
@@ -54,11 +74,9 @@ export function ExportPDFButton({ account, transactions }: ExportPDFButtonProps)
       body,
       styles: { fontSize: 9, cellPadding: 6 },
       headStyles: { fillColor: [0, 51, 102] },
-      didDrawPage: (data) => {
+      didDrawPage: () => {
         // Header per page
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
-        doc.text("PREFEITURA DE INAJÁ", pageWidth / 2, 30, { align: 'center' });
+        drawHeader();
         // Footer per page
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
